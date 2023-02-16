@@ -1,2 +1,2 @@
 # Meme-generator
-meme generator App Built With JS&HTML&CSS
+meme generator App Developed With JS&HTML&CSS
