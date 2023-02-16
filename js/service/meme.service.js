@@ -6,7 +6,6 @@ var gSavedMemes = []
 var gKeyWordSearchCountMap = { funny: 10, cat: 4, baby: 1 }
 
 var gImgs = [
-  //put keywords in array in random (for search) (funny,cute,animals,baby,happy)
   {
     id: 1,
     url: 'img/1.jpg',
@@ -108,6 +107,7 @@ var gMeme = {
       txt: 'Enter Text',
       size: 30,
       align: 'center',
+      stroke: 'black',
       pos: { x: 250, y: 35 },
       color: 'lightblue',
       isDrag: false,
@@ -146,17 +146,6 @@ function addLine() {
   meme.selectedLineIdx++
 }
 
-//   const newLine = {
-//     txt: 'Enter Text',
-//     size: 30,
-//     align: 'center',
-//     pos: { x: 250, y: 35 },
-//     color: getRandomColor(),
-//   }
-//   meme.lines.splice(selectedLineIdx + 1, 0, newLine)
-//   meme.selectedLineIdx++
-// }
-
 function deleteLine() {
   if (!gMeme.selectedLineIdx) return
 
@@ -173,6 +162,7 @@ function handleSizeText(diff) {
   const { selectedLineIdx } = meme
   meme.lines[selectedLineIdx].size += diff
 }
+
 function handleAlignText(diff) {
   const meme = getMeme()
   const { selectedLineIdx } = meme
@@ -182,9 +172,20 @@ function handleAlignText(diff) {
 }
 
 function handleEmoji(emoji) {
+  //we want to add emoji like a new line inside the canvas
   const meme = getMeme()
   const { selectedLineIdx } = meme
-  meme.lines[selectedLineIdx].txt += emoji
+  const newLine = {
+    txt: emoji,
+    size: 30,
+    align: 'center',
+    pos: { x: 250, y: 60 },
+    color: getRandomColor(),
+    isDrag: false,
+  }
+
+  meme.lines.splice(selectedLineIdx + 1, 0, newLine)
+  meme.selectedLineIdx++
 }
 
 function selectImg(imgId) {
@@ -295,56 +296,87 @@ function getLine() {
   return meme.lines[selectedLineIdx]
 }
 
-// function getTextSize(txt) {
-//   const meme = getMeme()
-//   const { selectedLineIdx } = meme
-//   const line = meme.lines[selectedLineIdx]
-//   gCtx.font = `${line.size}px ${gFontFamily}`
-//   const width = gCtx.measureText(txt).width
-//   const height = line.size
-//   return { width, height }
-// }
+function drawText(line) {
+  const { txt, size, align, color } = line
+  gCtx.lineWidth = 2
+  gCtx.strokeStyle = 'black'
+  gCtx.fillStyle = color
+  gCtx.font = `${size}px ${gFontFamily}`
+  gCtx.textAlign = align
+  gCtx.fillText(txt, line.pos.x, line.pos.y)
+  gCtx.strokeText(txt, line.pos.x, line.pos.y)
+}
 
-// function isLineClicked(clickedPos) {
-//   //in this function we need to check if the user clicked on the line
-//   //we need to know the position of the line
-//   //we need to know the size of the line
-//   //we can know the line by the selectedLineIdx and the lines array aand his align
+function renderText(meme) {
+  var meme = getMeme()
+  meme.lines.forEach((textLine, idx) => {
+    const { txt, size, align, color, stroke } = textLine
+    gCtx.lineWidth = 2
+    gCtx.strokeStyle = stroke
+    gCtx.fillStyle = color
+    gCtx.font = `${size}px ${gFontFamily}`
+    gCtx.textAlign = align
 
-//   const meme = getMeme()
-//   const { selectedLineIdx } = meme
-//   const line = meme.lines[selectedLineIdx]
-//   const { width, height } = getTextSize(line.txt)
-//   const { x, y } = line.pos
-//   // console.log(line)
-//   console.log(width, height, x, y)
-//   if (line.align === 'center') {
-//     if (
-//       clickedPos.x >= x - width / 2 &&
-//       clickedPos.x <= x + width / 2 &&
-//       clickedPos.y >= y - height / 2 &&
-//       clickedPos.y <= y + height / 2
-//     ) {
-//       return true
-//     }
-//   } else if (line.align === 'left') {
-//     if (
-//       clickedPos.x >= x &&
-//       clickedPos.x <= x + width &&
-//       clickedPos.y >= y - height / 2 &&
-//       clickedPos.y <= y + height / 2
-//     ) {
-//       return true
-//     }
-//   } else if (line.align === 'right') {
-//     if (
-//       clickedPos.x >= x - width &&
-//       clickedPos.x <= x &&
-//       clickedPos.y >= y - height / 2 &&
-//       clickedPos.y <= y + height / 2
-//     ) {
-//       return true
-//     }
-//   }
-//   return false
-// }
+    var posX
+    var posY
+
+    switch (align) {
+      case 'left':
+        posX = 10
+        break
+      case 'center':
+        posX = gElCanvas.width / 2
+        break
+      case 'right':
+        posX = gElCanvas.width - 10
+        break
+    }
+
+    switch (idx) {
+      case 0:
+        posY = 50
+        break
+      case 1:
+        posY = gElCanvas.height - 50
+        break
+      case 2:
+        posY = gElCanvas.height / 2
+        break
+    }
+
+    gCtx.fillText(txt, posX, posY, gElCanvas.width)
+    gCtx.strokeText(txt, posX, posY, gElCanvas.width)
+  })
+}
+
+function renderGallery() {
+  var imgs = getImgs()
+  var strHtmls = imgs.map((img) => {
+    return `<img src="${img.url}" onclick="onSelectImg(${img.id})" />`
+  })
+  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
+  createBtnForRandomMeme()
+}
+
+function getImgs() {
+  return gImgs
+}
+
+function handleStrokeText() {
+  var meme = getMeme()
+  meme.lines.forEach((line) => {
+    if (line.stroke === 'black') {
+      line.stroke = getRandomColor()
+    } else {
+      line.stroke = 'black'
+    }
+  })
+}
+
+function renderSavedMemes() {
+  var savedMemes = loadFromStorage('savedMemes')
+  var strHtmls = savedMemes.map((meme) => {
+    return `<img src="img/${meme.selectedImgId}.jpg" onclick="onSelectSavedMeme(${meme.selectedImgId})" />`
+  })
+  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
+}

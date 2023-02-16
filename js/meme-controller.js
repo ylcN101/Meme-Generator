@@ -7,8 +7,6 @@ var gElContainer
 var gCtx
 var gFontFamily = 'Impact'
 var gStartPos
-var gIsDrag = false
-var gDragIdx = null
 
 function onInit() {
   gElCanvas = document.querySelector('#canvas')
@@ -22,8 +20,18 @@ function addListeners() {
   addMouseListeners()
   window.addEventListener('resize', () => {
     resizeCanvas()
-    renderMeme()
+    renderCanvas()
   })
+}
+
+function renderCanvas() {
+  const meme = getMeme()
+  const img = new Image()
+  img.src = `img/${meme.selectedImgId}.jpg`
+  img.onload = () => {
+    gCtx.drawImage(img, 0, 0, gElCanvas.width, gElCanvas.height)
+    renderText()
+  }
 }
 
 function renderInputMeme() {
@@ -35,7 +43,7 @@ function renderInputMeme() {
   } else {
     elText.value = meme.lines[selectedLineIdx].txt
   }
-  elText.focus()
+  // elText.focus()
 }
 
 function renderMeme() {
@@ -63,59 +71,6 @@ function onDrawText() {
 
   meme.lines.forEach((line) => {
     drawText(line)
-  })
-}
-
-function drawText(line) {
-  const { txt, size, align, color } = line
-  gCtx.lineWidth = 2
-  gCtx.strokeStyle = 'black'
-  gCtx.fillStyle = color
-  gCtx.font = `${size}px ${gFontFamily}`
-  gCtx.textAlign = align
-  gCtx.fillText(txt, line.pos.x, line.pos.y)
-  gCtx.strokeText(txt, line.pos.x, line.pos.y)
-}
-
-function renderText(meme) {
-  var meme = getMeme()
-  meme.lines.forEach((textLine, idx) => {
-    const { txt, size, align, color } = textLine
-    gCtx.lineWidth = 2
-    gCtx.strokeStyle = 'black'
-    gCtx.fillStyle = color
-    gCtx.font = `${size}px ${gFontFamily}`
-    gCtx.textAlign = align
-
-    var posX
-    var posY
-
-    switch (align) {
-      case 'left':
-        posX = 10
-        break
-      case 'center':
-        posX = gElCanvas.width / 2
-        break
-      case 'right':
-        posX = gElCanvas.width - 10
-        break
-    }
-
-    switch (idx) {
-      case 0:
-        posY = 50
-        break
-      case 1:
-        posY = gElCanvas.height - 50
-        break
-      case 2:
-        posY = gElCanvas.height / 2
-        break
-    }
-
-    gCtx.fillText(txt, posX, posY, gElCanvas.width)
-    gCtx.strokeText(txt, posX, posY, gElCanvas.width)
   })
 }
 
@@ -157,15 +112,6 @@ function onShowGallery() {
   renderGallery()
 }
 
-function renderGallery() {
-  var imgs = getImgs()
-  var strHtmls = imgs.map((img) => {
-    return `<img src="${img.url}" onclick="onSelectImg(${img.id})" />`
-  })
-  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
-  createBtnForRandomMeme()
-}
-
 function createBtnForRandomMeme() {
   var elBtn = document.createElement('button')
   elBtn.innerText = 'Generate Random Meme'
@@ -196,10 +142,6 @@ function onGenerateRandomMeme() {
   renderMeme()
 }
 
-function getImgs() {
-  return gImgs
-}
-
 function onSelectImg(imgId) {
   var elModal = document.querySelector('.modal-gallery')
   elModal.style.display = 'none'
@@ -210,6 +152,7 @@ function onSelectImg(imgId) {
 }
 
 function onHandleEmoji(emoji) {
+  if (gMeme.lines.length === 3) return
   handleEmoji(emoji)
   renderMeme()
 }
@@ -219,8 +162,8 @@ function onHandleAlignText(diff) {
   renderMeme()
 }
 
-function onHandleStyleText() {
-  handleStyleText()
+function onHandleStrokeText() {
+  handleStrokeText()
   renderMeme()
 }
 
@@ -246,14 +189,6 @@ function onShowSavedMemes() {
   renderSavedMemes()
 }
 
-function renderSavedMemes() {
-  var savedMemes = loadFromStorage('savedMemes')
-  var strHtmls = savedMemes.map((meme) => {
-    return `<img src="img/${meme.selectedImgId}.jpg" onclick="onSelectSavedMeme(${meme.selectedImgId})" />`
-  })
-  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
-}
-
 function onSelectSavedMeme(imgId) {
   var elModal = document.querySelector('.modal-gallery')
   elModal.style.display = 'none'
@@ -265,4 +200,26 @@ function onSelectSavedMeme(imgId) {
 
 function onRefresh() {
   location.reload()
+}
+
+function onDownloadCanvas(elLink) {
+  const data = gElCanvas.toDataURL()
+  elLink.href = data
+  elLink.download = 'my-meme'
+}
+
+function onShareImg() {
+  const imgDataUrl = gElCanvas.toDataURL('image/jpeg') // Gets the canvas content as an image format
+
+  // A function to be called if request succeeds
+  function onSuccess(uploadedImgUrl) {
+    // Encode the instance of certain characters in the url
+    const encodedUploadedImgUrl = encodeURIComponent(uploadedImgUrl)
+    console.log(encodedUploadedImgUrl)
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodedUploadedImgUrl}&t=${encodedUploadedImgUrl}`
+    )
+  }
+  // Send the image to the server
+  doUploadImg(imgDataUrl, onSuccess)
 }

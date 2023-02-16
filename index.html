@@ -88,17 +88,15 @@
             <i class="fa-solid fa-align-right"></i>
           </button>
 
-          <button class="text-bold" onclick="onHandleStyleText()">
+          <button class="text-bold" onclick="onHandleStrokeText()">
             <i class="fa-solid fa-fill-drip"></i>
           </button>
 
           <!-- color picker -->
 
-          <label class="color-text" for="color-text"
-            ><i class="fa-solid fa-palette"></i>
-          </label>
           <input class = "color-picker "type="color" id="color-text"
-          name="color" onchange="onHandleColorText(this.value)" / >
+          name="color" value="#43da82" onchange="onHandleColorText(this.value)"
+          / >
 
           <!-- options for fonts -->
           <select
@@ -138,7 +136,7 @@
           <a
             href="#"
             class="download-canvas"
-            onclick="downloadCanvas(this)"
+            onclick="onDownloadCanvas(this)"
             download="file-name"
             ><i class="fa-solid fa-download"></i
           ></a>
