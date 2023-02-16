@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://kit.fontawesome.com/4d1eea4b96.js"
+      crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/mq.css" />
+
+    <title>Meme Generation</title>
+  </head>
+  <body onload="onInit()" class="main-layout">
+    <header class="main-header">
+      <div onclick="onRefresh()" class="logo">Meme Generator</div>
+      <div class="gallery">
+        <button onclick="onShowSavedMemes()">Saved Memes</button>
+        <button onclick="onShowGallery()">Meme Gallery</button>
+      </div>
+
+      <datalist id="searchMeme">
+        <option value="funny" label="funny"></option>
+        <option value="cute" label="cute"></option>
+        <option value="animals" label="animals"></option>
+        <option value="baby" label="baby"></option>
+        <option value="happy" label="happy"></option>
+      </datalist>
+    </header>
+    <div class="searchbar">
+      <input
+        type="text"
+        class="search"
+        name="search"
+        list="searchMeme"
+        oninput="onSearch(this.value)"
+        placeholder="Search for a meme" />
+    </div>
+    <div class="modal-gallery"></div>
+
+    <main class="main-content">
+      <div class="canvas-container">
+        <canvas class="canvas" id="canvas" width="500" height="500"> </canvas>
+      </div>
+
+      <section class="user-control">
+        <div class="input-container">
+          <input
+            type="text"
+            id="meme-text"
+            class="text-input"
+            name="txt"
+            oninput="onAddText(this.value)"
+            placeholder="Enter your text here" />
+        </div>
+        <div class="user-control-btns">
+          <button class="btn-change-line" onclick="onMoveLine()">
+            <i class="fa-solid fa-arrows-up-down"></i>
+          </button>
+          <button class="btn-add-line" onclick="onAddLine()">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <button class="btn-remove-el" onclick="onRemoveElement()">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+
+        <section class="user-control-fonts">
+          <button class="text-larger" onclick="onHandleSizeText(10)">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <button class="text-smaller" onclick="onHandleSizeText(-10)">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <!-- btn text align left -->
+          <button class="text-align-left" onclick="onHandleAlignText('left')">
+            <i class="fa-solid fa-align-left"></i>
+          </button>
+          <!-- btn text align center -->
+          <button
+            class="text-align-center"
+            onclick="onHandleAlignText('center')">
+            <i class="fa-solid fa-align-center"></i>
+          </button>
+          <!-- btn text align right -->
+          <button class="text-align-right" onclick="onHandleAlignText('right')">
+            <i class="fa-solid fa-align-right"></i>
+          </button>
+
+          <button class="text-bold" onclick="onHandleStyleText()">
+            <i class="fa-solid fa-palette"></i>
+          </button>
+
+          <!-- color picker -->
+
+          <input type="color" id="color-text" name="color"
+          onchange="onHandleColorText(this.value)" / >
+
+          <!-- options for fonts -->
+          <select
+            class="font"
+            name="font"
+            id="font"
+            onchange="onHandleFontText(this.value)">
+            <option value="Impact">Impact</option>
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Monospace">Monospace</option>
+          </select>
+          <div class="emoji">
+            <button class="emoji-btn" onclick="onHandleEmoji('😀')">
+              <i class="fa-regular fa-face-smile-beam"></i>
+            </button>
+            <button class="emoji-btn" onclick="onHandleEmoji('😂')">
+              <i class="fa-regular fa-face-smile-beam"></i>
+            </button>
+            <button class="emoji-btn" onclick="onHandleEmoji('😍')">
+              <i class="fa-regular fa-face-grin-hearts"></i>
+            </button>
+            <button class="emoji-btn" onclick="onHandleEmoji('😎')">
+              <i class="fa-regular fa-face-grin-stars"></i>
+            </button>
+            <button class="emoji-btn" onclick="onHandleEmoji('🤣')">
+              <i class="fa-regular fa-face-grin-tears"></i>
+            </button>
+          </div>
+        </section>
+
+        <div class="user-save">
+          <button class="btn-save" onclick="onSaveMeme()">
+            Save <i class="fa-regular fa-floppy-disk"></i>
+          </button>
+          <a
+            href="#"
+            class="download-canvas"
+            onclick="downloadCanvas(this)"
+            download="file-name"
+            ><i class="fa-solid fa-download"></i> Download</a
+          >
+          <button class="btn-share" onclick="onShareImg()">
+            Share
+            <i class="fa-solid fa-share-nodes"></i>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/util.js"></script>
+    <script src="js/meme-gallery.js"></script>
+    <script src="js/meme-controller.js"></script>
+    <script src="js/service/storage.service.js"></script>
+    <script src="js/service/meme.service.js"></script>
+  </body>
+</html>
