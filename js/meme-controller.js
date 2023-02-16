@@ -16,28 +16,29 @@ function onInit() {
   renderMeme()
 }
 
-function addListeners() {
-  addMouseListeners()
-  window.addEventListener('resize', () => {
-    resizeCanvas()
-    renderCanvas()
-  })
+function renderMeme() {
+  const meme = getMeme()
+  renderImg(meme)
+  renderInputMeme()
 }
 
-function renderCanvas() {
-  const meme = getMeme()
-  const img = new Image()
-  img.src = `img/${meme.selectedImgId}.jpg`
-  img.onload = () => {
-    gCtx.drawImage(img, 0, 0, gElCanvas.width, gElCanvas.height)
-    renderText()
-  }
+function addListeners() {
+  addMouseListeners()
+  addTouchListeners()
+  window.addEventListener('resize', () => {
+    onInit()
+  })
 }
 
 function renderInputMeme() {
   const meme = getMeme()
   const elText = document.querySelector('.text-input')
   const { selectedLineIdx } = meme
+  if (!meme.lines.length) {
+    elText.value = ''
+    return
+  }
+
   if (meme.lines[selectedLineIdx].txt === 'Enter Text') {
     elText.value = ''
   } else {
@@ -46,13 +47,8 @@ function renderInputMeme() {
   // elText.focus()
 }
 
-function renderMeme() {
-  const meme = getMeme()
-  renderImg(meme)
-  renderInputMeme()
-}
-
 function renderImg(meme) {
+  if (!meme.selectedImgId) return
   const img = new Image()
   img.src = `img/${meme.selectedImgId}.jpg`
   img.onload = () => {
@@ -79,8 +75,8 @@ function onAddText(txt) {
   renderMeme()
 }
 
-function onMoveLine() {
-  moveLine()
+function onSwitchLine() {
+  switchLine()
   renderMeme()
 }
 
@@ -102,7 +98,6 @@ function onHandleSizeText(diff) {
 }
 
 function onShowGallery() {
-  console.log('show gallery')
   var elModal = document.querySelector('.modal-gallery')
   elModal.style.display = 'flex'
   var elSearch = document.querySelector('.search')
@@ -123,7 +118,6 @@ function createBtnForRandomMeme() {
 function onSearch() {
   const elSearch = document.querySelector('.search')
   const searchValue = elSearch.value
-  console.log(searchValue)
   const imgs = getImgs()
   const strHtmls = imgs.map((img) => {
     if (img.keywords.includes(searchValue)) {
@@ -147,6 +141,12 @@ function onSelectImg(imgId) {
   elModal.style.display = 'none'
   var elContent = document.querySelector('.main-content')
   elContent.style.display = 'flex'
+
+  if (gMeme.lines.length) {
+    gMeme.lines = []
+    gMeme.selectedLineIdx = 0
+  }
+
   selectImg(imgId)
   renderMeme()
 }
@@ -215,11 +215,26 @@ function onShareImg() {
   function onSuccess(uploadedImgUrl) {
     // Encode the instance of certain characters in the url
     const encodedUploadedImgUrl = encodeURIComponent(uploadedImgUrl)
-    console.log(encodedUploadedImgUrl)
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodedUploadedImgUrl}&t=${encodedUploadedImgUrl}`
     )
   }
   // Send the image to the server
   doUploadImg(imgDataUrl, onSuccess)
+}
+
+//DRAG AND DROP
+
+function onDown(ev) {
+  const meme = getMeme()
+  const pos = getEvPos(ev)
+  if (!meme.lines.length) return
+  if (!isLineClicked(pos)) return
+  setLineDrag(true)
+  gStartPos = pos
+}
+
+function setLineDrag(isDrag) {
+  var currLine = gMeme.lines[gMeme.selectedLineIdx]
+  currLine.isDrag = isDrag
 }

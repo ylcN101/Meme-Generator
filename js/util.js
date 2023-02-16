@@ -44,16 +44,16 @@ function resizeCanvas() {
 // }
 
 function addMouseListeners() {
-  // gElCanvas.addEventListener('mousedown', onDown)
+  gElCanvas.addEventListener('mousedown', onDown)
   // gElCanvas.addEventListener('mousemove', onMove)
   // gElCanvas.addEventListener('mouseup', onUp)
 }
 
-// function addTouchListeners() {
-//   gElCanvas.addEventListener('touchstart', onDown)
-//   gElCanvas.addEventListener('touchmove', onMove)
-//   gElCanvas.addEventListener('touchend', onUp)
-// }
+function addTouchListeners() {
+  // gElCanvas.addEventListener('touchstart', onDown)
+  // gElCanvas.addEventListener('touchmove', onMove)
+  // gElCanvas.addEventListener('touchend', onUp)
+}
 
 function getEvPos(ev) {
   // Gets the offset pos , the default pos
@@ -171,7 +171,6 @@ function doUploadImg(imgDataUrl, onSuccess) {
 
     // If the response is ok, call the onSuccess callback function,
     // that will create the link to facebook using the url we got
-    console.log('Got back live url:', url)
     onSuccess(url)
   }
   XHR.onerror = (req, ev) => {

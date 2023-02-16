@@ -122,13 +122,26 @@ function getMeme() {
 function addText(txt) {
   const meme = getMeme()
   const { selectedLineIdx } = meme
+  if (!meme.lines.length) {
+    const newLine = {
+      txt: txt,
+      size: 30,
+      align: 'center',
+      pos: { x: 250, y: 60 },
+      color: getRandomColor(),
+      isDrag: false,
+    }
+    meme.lines.push(newLine)
+    return
+  }
+
   meme.lines[selectedLineIdx].txt = txt
 }
 
 function addLine() {
   const meme = getMeme()
   const { selectedLineIdx } = meme
-  //we need to know the position of the line we want to add by the selectedLineIdx
+
   if (selectedLineIdx === 1) {
     var posY = gElCanvas.height - 60
   } else if (selectedLineIdx === 2) {
@@ -154,7 +167,6 @@ function deleteLine() {
   meme.lines.splice(selectedLineIdx, 1)
   meme.selectedLineIdx--
   if (meme.selectedLineIdx <= 0) meme.selectedLineIdx = 0
-  console.log(meme)
 }
 
 function handleSizeText(diff) {
@@ -167,8 +179,6 @@ function handleAlignText(diff) {
   const meme = getMeme()
   const { selectedLineIdx } = meme
   meme.lines[selectedLineIdx].align = diff
-
-  console.log(meme)
 }
 
 function handleEmoji(emoji) {
@@ -226,9 +236,22 @@ function saveMeme() {
     })
     if (!isMemeExist) {
       savedMemes.push(meme)
+
       saveToStorage('savedMemes', savedMemes)
     }
   }
+}
+
+function getImgById(imgId) {
+  const imgs = getImgs()
+  const img = imgs.find((img) => {
+    return img.id === imgId
+  })
+  return img
+}
+
+function getSavedMemes() {
+  return loadFromStorage('savedMemes')
 }
 
 function generateRandomMeme() {
@@ -280,7 +303,14 @@ function selectSavedMeme(imgId) {
   gMeme = meme
 }
 
-function moveLine() {
+function moveLine(dx, dy) {
+  const meme = getMeme()
+  const { selectedLineIdx } = meme
+  meme.lines[selectedLineIdx].pos.x += dx
+  meme.lines[selectedLineIdx].pos.y += dy
+}
+
+function switchLine() {
   const meme = getMeme()
   const { selectedLineIdx } = meme
   if (selectedLineIdx === meme.lines.length - 1) {
@@ -305,6 +335,25 @@ function drawText(line) {
   gCtx.textAlign = align
   gCtx.fillText(txt, line.pos.x, line.pos.y)
   gCtx.strokeText(txt, line.pos.x, line.pos.y)
+}
+
+function isLineClicked(clickedPos) {
+  var isClickInLine = false
+  const meme = getMeme()
+  meme.lines.forEach((line, idx) => {
+    var linePosX = line.pos.x
+    var linePosY = line.pos.y
+    if (
+      clickedPos.x >= linePosX - 50 &&
+      clickedPos.x <= linePosX + 50 &&
+      clickedPos.y >= linePosY - 50 &&
+      clickedPos.y <= linePosY + 50
+    ) {
+      isClickInLine = true
+      meme.selectedLineIdx = idx
+    }
+  })
+  return isClickInLine
 }
 
 function renderText(meme) {
@@ -375,8 +424,24 @@ function handleStrokeText() {
 
 function renderSavedMemes() {
   var savedMemes = loadFromStorage('savedMemes')
+  //we want to render the current url of the meme
   var strHtmls = savedMemes.map((meme) => {
-    return `<img src="img/${meme.selectedImgId}.jpg" onclick="onSelectSavedMeme(${meme.selectedImgId})" />`
+    return `<img src="img/${meme.selectedImgId}.jpg"
+    onclick="onSelectSavedMeme(${meme.selectedImgId})" />`
   })
   document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
+}
+
+function loadImageFromInput(ev, onImageReady) {
+  const reader = new FileReader()
+  // After we read the file
+  reader.onload = function (event) {
+    let img = new Image() // Create a new html img element
+    img.src = event.target.result // Set the img src to the img file we read
+    // Run the callBack func, To render the img on the canvas
+    img.onload = onImageReady.bind(null, img)
+    // Can also do it this way:
+    // img.onload = () => onImageReady(img)
+  }
+  reader.readAsDataURL(ev.target.files[0]) // Read the file we picked
 }
