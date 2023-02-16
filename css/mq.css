@@ -61,14 +61,14 @@
 
 @media (max-width: 548px) {
   .search {
-    display: block;
+    display: none;
     margin-block-start: 5em;
     left: 2em;
   }
   .modal-gallery {
     display: flex;
     margin-block-start: 4em;
-    /* gap: 23px; */
+
     margin-inline-start: 3em;
   }
 

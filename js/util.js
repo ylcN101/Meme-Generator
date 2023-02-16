@@ -29,10 +29,11 @@ function getValFromParam(key) {
 }
 
 function resizeCanvas() {
-  const elContainer = document.querySelector('.canvas-container')
+  const elContainer = document.querySelector('.canvas')
   gElCanvas.width = elContainer.offsetWidth
   gElCanvas.height = elContainer.offsetHeight
 }
+
 // function addListeners() {
 //   addMouseListeners()
 //   addTouchListeners()

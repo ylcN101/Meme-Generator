@@ -89,13 +89,16 @@
           </button>
 
           <button class="text-bold" onclick="onHandleStyleText()">
-            <i class="fa-solid fa-palette"></i>
+            <i class="fa-solid fa-fill-drip"></i>
           </button>
 
           <!-- color picker -->
 
-          <input type="color" id="color-text" name="color"
-          onchange="onHandleColorText(this.value)" / >
+          <label class="color-text" for="color-text"
+            ><i class="fa-solid fa-palette"></i>
+          </label>
+          <input class = "color-picker "type="color" id="color-text"
+          name="color" onchange="onHandleColorText(this.value)" / >
 
           <!-- options for fonts -->
           <select
@@ -130,17 +133,16 @@
 
         <div class="user-save">
           <button class="btn-save" onclick="onSaveMeme()">
-            Save <i class="fa-regular fa-floppy-disk"></i>
+            <i class="fa-regular fa-floppy-disk"></i>
           </button>
           <a
             href="#"
             class="download-canvas"
             onclick="downloadCanvas(this)"
             download="file-name"
-            ><i class="fa-solid fa-download"></i> Download</a
-          >
+            ><i class="fa-solid fa-download"></i
+          ></a>
           <button class="btn-share" onclick="onShareImg()">
-            Share
             <i class="fa-solid fa-share-nodes"></i>
           </button>
         </div>

@@ -179,9 +179,15 @@ img {
   margin-block-start: auto;
   justify-content: space-around;
 }
+.color-picker {
+  display: none;
+}
 
 .user-save a {
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 10px;
 }
 
 .emoji {
@@ -227,7 +233,7 @@ img {
 
 .user-save button {
   text-align: center;
-  padding: 5px;
+  padding: 10px;
   background-color: #5292ce;
   border-style: none;
   border-radius: 5px;
