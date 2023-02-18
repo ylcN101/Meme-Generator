@@ -1,0 +1,19 @@
+.canvas {
+  border-radius: 20px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+}
+
+.canvas-container {
+  display: flex;
+}
+
+.download-canvas {
+  background-color: #8f44bb;
+  padding: 3px;
+  border-radius: 5px;
+  color: #fff;
+}
+
+.download-canvas:hover {
+  background-color: #6f2b9f;
+}

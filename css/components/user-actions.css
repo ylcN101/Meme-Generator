@@ -1,0 +1,35 @@
+.font {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 15px;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.search {
+  display: none;
+  font-family: 'Arial Narrow Bold', sans-serif;
+  font-weight: 700;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  left: 34%;
+  top: 1.8em;
+  border-style: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.color-picker {
+  width: 15%;
+  height: 35px;
+  border-radius: 100px;
+  border: none;
+  background-color: #19a59f;
+  cursor: pointer;
+}

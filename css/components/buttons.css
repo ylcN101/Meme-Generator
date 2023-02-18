@@ -1,0 +1,87 @@
+.main-header button {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 1.2rem;
+  color: #fff;
+  border-style: none;
+  border-radius: 5px;
+  margin-inline-start: 1rem;
+  padding: 0.8rem;
+  background-color: #5970c1;
+  background-image: linear-gradient(-86deg, #33be6d 0%, #0c98b9 100%);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.user-control-btns {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-change-line {
+  padding: 5px;
+  background-color: rgb(39, 13, 187);
+  border-style: none;
+  border-radius: 5px;
+}
+
+.btn-add-line {
+  padding: 5px;
+  background-color: rgb(88, 155, 88);
+  border-style: none;
+  border-radius: 5px;
+}
+
+.btn-remove-el {
+  padding: 5px;
+  background-color: rgb(197, 29, 51);
+  border-style: none;
+  border-radius: 5px;
+}
+
+.btn-random {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  padding: 5px;
+  width: 10em;
+  position: absolute;
+  z-index: 1;
+  font-size: 1em;
+  left: 50%;
+  top: 0.8em;
+  color: #fff;
+  border-style: none;
+  border-radius: 5px;
+  background-image: linear-gradient(-86deg, #33be6d 0%, #0c98b9 100%);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.fa-solid {
+  font-size: 30px;
+  cursor: pointer;
+}
+.fa-solid:hover {
+  color: #19a59f;
+}
+
+.fa-regular {
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.fa-regular:hover {
+  color: #19a59f;
+}
+.user-control-fonts button {
+  border-style: none;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.user-save button {
+  text-align: center;
+  padding: 10px;
+  background-color: #5292ce;
+  border-style: none;
+  border-radius: 5px;
+}

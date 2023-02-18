@@ -23,10 +23,9 @@ function renderMeme() {
 }
 
 function addListeners() {
-  addMouseListeners()
-  addTouchListeners()
   window.addEventListener('resize', () => {
-    onInit()
+    resizeCanvas()
+    renderMeme()
   })
 }
 
