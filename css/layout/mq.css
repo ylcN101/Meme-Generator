@@ -9,6 +9,10 @@
   .btn-random {
     margin-left: 2em;
   }
+  .logo {
+    font-size: 2rem;
+    margin-inline-end: auto;
+  }
 }
 
 /* TABLET */
@@ -67,15 +71,19 @@
     margin-block-start: 5em;
     left: 2em;
   }
-  .main-header button {
+
+  .gallery {
     display: flex;
-    padding: 0.5rem;
   }
+
   .modal-gallery {
     display: flex;
     margin-block-start: 4em;
-
     margin-inline-start: 3em;
+  }
+  .logo {
+    font-size: 1em;
+    margin-inline-end: auto;
   }
 
   .canvas-container {
