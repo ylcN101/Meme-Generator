@@ -5,7 +5,7 @@ const TOUCH_EVS = ['touchstart', 'touchmove', 'touchend']
 var gElCanvas
 var gElContainer
 var gCtx
-var gFontFamily = 'Impact'
+
 var gStartPos
 
 function onInit() {
@@ -19,12 +19,13 @@ function onInit() {
 function renderMeme() {
   const meme = getMeme()
   renderImg(meme)
+  renderText()
   renderInputMeme()
 }
 
 function addListeners() {
+  addMouseListeners()
   window.addEventListener('resize', () => {
-    resizeCanvas()
     renderMeme()
   })
 }
@@ -98,7 +99,7 @@ function onHandleSizeText(diff) {
 
 function onShowGallery() {
   var elModal = document.querySelector('.modal-gallery')
-  elModal.style.display = 'flex'
+  elModal.style.display = 'block'
   var elSearch = document.querySelector('.search')
   elSearch.style.display = 'block'
   var elContent = document.querySelector('.main-content')
@@ -124,6 +125,9 @@ function onSearch() {
     }
   })
   document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
+  if (!searchValue) {
+    renderGallery()
+  }
 }
 
 function onGenerateRandomMeme() {
@@ -131,6 +135,9 @@ function onGenerateRandomMeme() {
   elModal.style.display = 'none'
   var elContent = document.querySelector('.main-content')
   elContent.style.display = 'flex'
+  var elSearch = document.querySelector('.search')
+  elSearch.style.display = 'none'
+
   generateRandomMeme()
   renderMeme()
 }
@@ -140,6 +147,8 @@ function onSelectImg(imgId) {
   elModal.style.display = 'none'
   var elContent = document.querySelector('.main-content')
   elContent.style.display = 'flex'
+  var elSearch = document.querySelector('.search')
+  elSearch.style.display = 'none'
 
   if (gMeme.lines.length) {
     gMeme.lines = []
@@ -178,6 +187,15 @@ function onHandleFontText(font) {
 
 function onSaveMeme() {
   saveMeme()
+}
+
+function showModal(msg) {
+  const el = document.querySelector('.user-msg')
+  el.innerText = msg
+  el.classList.add('open')
+  setTimeout(() => {
+    el.classList.remove('open')
+  }, 2000)
 }
 
 function onShowSavedMemes() {
@@ -226,11 +244,40 @@ function onShareImg() {
 
 function onDown(ev) {
   const meme = getMeme()
-  const pos = getEvPos(ev)
   if (!meme.lines.length) return
-  if (!isLineClicked(pos)) return
+  const pos = getEvPos(ev)
+  const line = getLine()
+  if (!isLineClicked(pos, line)) return
   setLineDrag(true)
   gStartPos = pos
+}
+
+function getCurrImg() {
+  return gImgs.find((img) => img.id === gMeme.selectedImgId)
+}
+
+function onMove(ev) {
+  const meme = getMeme()
+  if (!meme.lines.length) return
+  if (!isLineDrag()) return
+  const pos = getEvPos(ev)
+  const dx = pos.x - gStartPos.x
+  const dy = pos.y - gStartPos.y
+  moveLine(dx, dy)
+  gStartPos = pos
+  renderMeme()
+}
+
+function onUp() {
+  const meme = getMeme()
+  if (!meme.lines.length) return
+  setLineDrag(false)
+  renderMeme()
+}
+
+function isLineDrag() {
+  const meme = getMeme()
+  return meme.lines[meme.selectedLineIdx].isDrag
 }
 
 function setLineDrag(isDrag) {

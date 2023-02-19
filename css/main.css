@@ -17,6 +17,7 @@ body {
   background-color: #22252c;
   background-image: linear-gradient(315deg, #22252c 0%, #1e1e1e 74%);
   font-family: 'Roboto', sans-serif;
+  /* overflow: hidden; */
 }
 
 img {
@@ -28,4 +29,19 @@ img {
   color: #fff;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   cursor: pointer;
+}
+
+.user-msg {
+  display: none;
+  position: absolute;
+  top: 8.2em;
+  left: 0em;
+  z-index: 2;
+  background-color: #46cf7f;
+  padding: 10px;
+  transition: all 0.5s ease-in-out;
+}
+
+.user-msg.open {
+  display: block;
 }

@@ -12,16 +12,22 @@
 
 .modal-gallery {
   display: none;
-  display: flex;
-  flex-wrap: wrap;
-  position: absolute;
+  column-count: 3;
+  column-gap: 1em;
+  margin-block-start: 4em;
+  margin-inline-start: 4.5em;
 }
 
 .modal-gallery img {
+  cursor: pointer;
   margin-block-start: 100px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
   padding: 10px;
   border-radius: 10px;
   width: 10em;
   margin-inline-end: 0.6em;
+}
+
+.modal-gallery img:hover {
+  transform: scale(1.1);
 }

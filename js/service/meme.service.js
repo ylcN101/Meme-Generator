@@ -2,7 +2,7 @@
 
 const STORAGE_KEY = 'memesDB'
 var gSavedMemes = []
-
+var gFontFamily = 'Impact'
 var gKeyWordSearchCountMap = { funny: 10, cat: 4, baby: 1 }
 
 var gImgs = [
@@ -99,9 +99,21 @@ var gImgs = [
   },
 ]
 
+function renderSavedMemes() {
+  var savedMemes = loadFromStorage('savedMemes')
+  //we want to render the current url of the meme
+  var strHtmls = savedMemes.map((meme) => {
+    return `<img src="img/${meme.selectedImgId}.jpg"
+
+    onclick="onSelectSavedMeme(${meme.selectedImgId})" />`
+  })
+  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
+}
+
 var gMeme = {
   selectedImgId: 2,
   selectedLineIdx: 0,
+
   lines: [
     {
       txt: 'Enter Text',
@@ -111,6 +123,7 @@ var gMeme = {
       pos: { x: 250, y: 35 },
       color: 'lightblue',
       isDrag: false,
+      font: 'Impact',
     },
   ],
 }
@@ -123,36 +136,36 @@ function addText(txt) {
   const meme = getMeme()
   const { selectedLineIdx } = meme
   if (!meme.lines.length) {
-    const newLine = {
-      txt: txt,
+    meme.lines.push({
+      txt,
       size: 30,
       align: 'center',
-      pos: { x: 250, y: 60 },
+      font: 'Impact',
+      pos: { x: 250, y: 35 },
       color: getRandomColor(),
       isDrag: false,
-    }
-    meme.lines.push(newLine)
-    return
-  }
+      stroke: 'black',
+    })
+  } else meme.lines[selectedLineIdx].txt = txt
+}
 
-  meme.lines[selectedLineIdx].txt = txt
+function updateLineDiff(selectedLineIdx) {
+  if (selectedLineIdx === 0) return { x: 250, y: 250 }
+  if (selectedLineIdx === 1) return { x: 250, y: 450 }
 }
 
 function addLine() {
   const meme = getMeme()
   const { selectedLineIdx } = meme
-
-  if (selectedLineIdx === 1) {
-    var posY = gElCanvas.height - 60
-  } else if (selectedLineIdx === 2) {
-    var posY = gElCanvas.height / 2
-  }
   const newLine = {
     txt: 'Enter Text',
     size: 30,
     align: 'center',
-    pos: { x: 250, y: posY },
+    font: 'Impact',
+    pos: updateLineDiff(selectedLineIdx),
     color: getRandomColor(),
+    isDrag: false,
+    stroke: 'black',
   }
 
   meme.lines.splice(selectedLineIdx + 1, 0, newLine)
@@ -199,7 +212,8 @@ function handleEmoji(emoji) {
 }
 
 function selectImg(imgId) {
-  gMeme.selectedImgId = imgId
+  const meme = getMeme()
+  meme.selectedImgId = imgId
 }
 
 function handleStyleText() {
@@ -220,25 +234,25 @@ function handleColorText(color) {
 }
 
 function handleFontText(font) {
-  gFontFamily = font
+  //we need to change the font of the text in the canvas only to the selected line
+  const meme = getMeme()
+  const { selectedLineIdx } = meme
+  meme.lines[selectedLineIdx].font = font
 }
 
 function saveMeme() {
   const meme = getMeme()
   var savedMemes = loadFromStorage('savedMemes')
   if (!savedMemes) savedMemes = []
-  if (savedMemes.length === 0) {
+  //we want to know if meme exist by the selectedImgId and the text that the user wrote
+  const memeExist = savedMemes.find((meme) => {
+    showModal('Already Saved')
+    return meme.selectedImgId === gMeme.selectedImgId
+  })
+  if (!memeExist) {
     savedMemes.push(meme)
+    showModal('Saved Successfully')
     saveToStorage('savedMemes', savedMemes)
-  } else {
-    const isMemeExist = savedMemes.some((savedMeme) => {
-      return savedMeme.selectedImgId === meme.selectedImgId
-    })
-    if (!isMemeExist) {
-      savedMemes.push(meme)
-
-      saveToStorage('savedMemes', savedMemes)
-    }
   }
 }
 
@@ -327,74 +341,45 @@ function getLine() {
 }
 
 function drawText(line) {
-  const { txt, size, align, color } = line
-  gCtx.lineWidth = 2
-  gCtx.strokeStyle = 'black'
+  const { txt, size, align, pos, color, font, stroke } = line
+  gCtx.lineWidth = '2'
+  gCtx.strokeStyle = stroke
   gCtx.fillStyle = color
-  gCtx.font = `${size}px ${gFontFamily}`
+  gCtx.font = `${size}px ${font}`
   gCtx.textAlign = align
-  gCtx.fillText(txt, line.pos.x, line.pos.y)
-  gCtx.strokeText(txt, line.pos.x, line.pos.y)
+
+  gCtx.fillText(txt, pos.x, pos.y)
+  gCtx.strokeText(txt, pos.x, pos.y)
+  const textWidth = gCtx.measureText(txt).width
+  const textHeight = size
+  const textPos = { x: pos.x - textWidth / 2, y: pos.y - textHeight }
+  return textPos
 }
 
 function isLineClicked(clickedPos) {
-  var isClickInLine = false
+  //we need to know the pos of all the lines in the canvas
   const meme = getMeme()
-  meme.lines.forEach((line, idx) => {
-    var linePosX = line.pos.x
-    var linePosY = line.pos.y
+  return meme.lines.some((line, idx) => {
+    const { size } = line
+    const { pos } = line
+    const textWidth = gCtx.measureText(line.txt).width
+    const textHeight = size
     if (
-      clickedPos.x >= linePosX - 50 &&
-      clickedPos.x <= linePosX + 50 &&
-      clickedPos.y >= linePosY - 50 &&
-      clickedPos.y <= linePosY + 50
+      clickedPos.x >= pos.x - textWidth / 2 &&
+      clickedPos.x <= pos.x + textWidth / 2 &&
+      clickedPos.y >= pos.y - textHeight &&
+      clickedPos.y <= pos.y
     ) {
-      isClickInLine = true
       meme.selectedLineIdx = idx
+      return true
     }
   })
-  return isClickInLine
 }
 
 function renderText(meme) {
   var meme = getMeme()
-  meme.lines.forEach((textLine, idx) => {
-    const { txt, size, align, color, stroke } = textLine
-    gCtx.lineWidth = 2
-    gCtx.strokeStyle = stroke
-    gCtx.fillStyle = color
-    gCtx.font = `${size}px ${gFontFamily}`
-    gCtx.textAlign = align
-
-    var posX
-    var posY
-
-    switch (align) {
-      case 'left':
-        posX = 10
-        break
-      case 'center':
-        posX = gElCanvas.width / 2
-        break
-      case 'right':
-        posX = gElCanvas.width - 10
-        break
-    }
-
-    switch (idx) {
-      case 0:
-        posY = 50
-        break
-      case 1:
-        posY = gElCanvas.height - 50
-        break
-      case 2:
-        posY = gElCanvas.height / 2
-        break
-    }
-
-    gCtx.fillText(txt, posX, posY, gElCanvas.width)
-    gCtx.strokeText(txt, posX, posY, gElCanvas.width)
+  meme.lines.forEach((line) => {
+    drawText(line)
   })
 }
 
@@ -412,24 +397,13 @@ function getImgs() {
 }
 
 function handleStrokeText() {
-  var meme = getMeme()
-  meme.lines.forEach((line) => {
-    if (line.stroke === 'black') {
-      line.stroke = getRandomColor()
-    } else {
-      line.stroke = 'black'
-    }
-  })
-}
-
-function renderSavedMemes() {
-  var savedMemes = loadFromStorage('savedMemes')
-  //we want to render the current url of the meme
-  var strHtmls = savedMemes.map((meme) => {
-    return `<img src="img/${meme.selectedImgId}.jpg"
-    onclick="onSelectSavedMeme(${meme.selectedImgId})" />`
-  })
-  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
+  const meme = getMeme()
+  const { selectedLineIdx } = meme
+  if (meme.lines[selectedLineIdx].stroke === 'black') {
+    meme.lines[selectedLineIdx].stroke = getRandomColor()
+  } else {
+    meme.lines[selectedLineIdx].stroke = 'black'
+  }
 }
 
 function loadImageFromInput(ev, onImageReady) {
