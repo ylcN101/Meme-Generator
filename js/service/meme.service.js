@@ -1,6 +1,7 @@
 'use strict'
 
 const STORAGE_KEY = 'memesDB'
+var gIsRect = false
 var gSavedMemes = []
 var gFontFamily = 'Impact'
 var gKeyWordSearchCountMap = { funny: 10, cat: 4, baby: 1 }
@@ -99,17 +100,6 @@ var gImgs = [
   },
 ]
 
-function renderSavedMemes() {
-  var savedMemes = loadFromStorage('savedMemes')
-  //we want to render the current url of the meme
-  var strHtmls = savedMemes.map((meme) => {
-    return `<img src="img/${meme.selectedImgId}.jpg"
-
-    onclick="onSelectSavedMeme(${meme.selectedImgId})" />`
-  })
-  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
-}
-
 var gMeme = {
   selectedImgId: 2,
   selectedLineIdx: 0,
@@ -132,6 +122,30 @@ function getMeme() {
   return gMeme
 }
 
+function renderKeyWordSearchCountMap() {
+  const elKeyWordSearchCountMap = document.querySelector('.key-word-count')
+  const strHtmls = Object.keys(gKeyWordSearchCountMap).map((key) => {
+    return `<span onclick="onSearch('${key}')">${key} (${gKeyWordSearchCountMap[key]})</span>`
+  })
+  elKeyWordSearchCountMap.innerHTML = strHtmls.join('')
+}
+
+function renderSearch(searchValue) {
+  if (!searchValue) {
+    renderGallery()
+    return
+  }
+
+  const filteredImgs = gImgs.filter((img) => {
+    return img.keywords.includes(searchValue)
+  })
+  const strHtmls = filteredImgs.map((img) => {
+    return `<img src="img/${img.id}.jpg" onclick="onSelectImg(${img.id})">`
+  })
+  const elGallery = document.querySelector('.modal-gallery')
+  elGallery.innerHTML = strHtmls.join('')
+}
+
 function addText(txt) {
   const meme = getMeme()
   const { selectedLineIdx } = meme
@@ -150,13 +164,15 @@ function addText(txt) {
 }
 
 function updateLineDiff(selectedLineIdx) {
-  if (selectedLineIdx === 0) return { x: 250, y: 250 }
-  if (selectedLineIdx === 1) return { x: 250, y: 450 }
+  if (selectedLineIdx === 0) return { x: 250, y: 100 }
+  else if (selectedLineIdx === 1) return { x: 250, y: 250 }
+  else if (selectedLineIdx === 2) return { x: 250, y: 400 }
 }
 
 function addLine() {
   const meme = getMeme()
   const { selectedLineIdx } = meme
+
   const newLine = {
     txt: 'Enter Text',
     size: 30,
@@ -173,7 +189,10 @@ function addLine() {
 }
 
 function deleteLine() {
-  if (!gMeme.selectedLineIdx) return
+  if (!gMeme.selectedLineIdx) {
+    showModal('You can not delete the first line')
+    return
+  }
 
   const meme = getMeme()
   const { selectedLineIdx } = meme
@@ -198,22 +217,24 @@ function handleEmoji(emoji) {
   //we want to add emoji like a new line inside the canvas
   const meme = getMeme()
   const { selectedLineIdx } = meme
-  const newLine = {
-    txt: emoji,
-    size: 30,
-    align: 'center',
-    pos: { x: 250, y: 60 },
-    color: getRandomColor(),
-    isDrag: false,
+  if (!meme.lines.length) {
+    meme.lines.push({
+      txt: emoji,
+      size: 30,
+      align: 'center',
+      font: 'Impact',
+      pos: { x: 250, y: 35 },
+      color: getRandomColor(),
+      isDrag: false,
+      stroke: 'black',
+    })
   }
-
-  meme.lines.splice(selectedLineIdx + 1, 0, newLine)
-  meme.selectedLineIdx++
+  addLine()
+  meme.lines[selectedLineIdx + 1].txt = emoji
 }
 
 function selectImg(imgId) {
-  const meme = getMeme()
-  meme.selectedImgId = imgId
+  gMeme.selectedImgId = imgId
 }
 
 function handleStyleText() {
@@ -240,20 +261,25 @@ function handleFontText(font) {
   meme.lines[selectedLineIdx].font = font
 }
 
-function saveMeme() {
-  const meme = getMeme()
+function saveMeme(memeUrl) {
+  gMeme.id = Date.now()
+  console.log(gMeme)
+  gMeme.currImg = memeUrl
   var savedMemes = loadFromStorage('savedMemes')
+  console.log(savedMemes)
   if (!savedMemes) savedMemes = []
-  //we want to know if meme exist by the selectedImgId and the text that the user wrote
-  const memeExist = savedMemes.find((meme) => {
-    showModal('Already Saved')
-    return meme.selectedImgId === gMeme.selectedImgId
-  })
-  if (!memeExist) {
-    savedMemes.push(meme)
-    showModal('Saved Successfully')
-    saveToStorage('savedMemes', savedMemes)
+  if (savedMemes.length) {
+    const meme = savedMemes.find((meme) => {
+      return meme.currImg === gMeme.currImg
+    })
+    if (meme) {
+      showModal('Meme already exist')
+      return
+    }
   }
+  savedMemes.push(gMeme)
+  showModal('Meme saved')
+  saveToStorage('savedMemes', savedMemes)
 }
 
 function getImgById(imgId) {
@@ -268,51 +294,42 @@ function getSavedMemes() {
   return loadFromStorage('savedMemes')
 }
 
+function getRandomPos() {
+  const pos = {
+    x: getRandomIntInclusive(100, 250),
+    y: getRandomIntInclusive(100, 400),
+  }
+  return pos
+}
+
 function generateRandomMeme() {
-  var imgs = getImgs()
-  var randomImg = imgs[getRandomIntInclusive(0, imgs.length - 1)]
-  selectImg(randomImg.id)
-  var randomLines = getRandomIntInclusive(1, 3)
-  for (var i = 0; i < randomLines; i++) {
+  if (!gImgs.length) return
+  const imgs = getImgs()
+  const randomImg = imgs[getRandomIntInclusive(0, imgs.length)]
+  const randomLines = getRandomIntInclusive(1, 2)
+  for (let i = 0; i < randomLines; i++) {
     addLine()
   }
-  var randomText = [
-    'Hello',
-    'Hi',
-    'Bye',
-    'Goodbye',
-    'What?',
-    'Why?',
-    'How?',
-    'When?',
-    'Cool',
-    'Nice',
-    'Awesome',
-    'Great',
-    'Super',
-    'Coding',
-    'Programming',
-    'Meme',
-    'Funny',
-  ]
-  gMeme.lines.forEach((line) => {
-    line.txt = randomText[getRandomIntInclusive(0, randomText.length - 1)]
+  const meme = getMeme()
+  meme.lines.forEach((line) => {
+    line.pos = getRandomPos()
+    line.color = getRandomColor()
+    line.txt = makeLorem()
   })
+  meme.selectedImgId = randomImg.id
+}
 
-  var randomSize = [20, 30, 40, 50, 60]
-  gMeme.lines.forEach((line) => {
-    line.size = randomSize[getRandomIntInclusive(0, randomSize.length - 1)]
-  })
-  var randomAlign = ['left', 'center', 'right']
-  gMeme.lines.forEach((line) => {
-    line.align = randomAlign[getRandomIntInclusive(0, randomAlign.length - 1)]
-  })
+function updateText(txt) {
+  const meme = getMeme()
+  const { selectedLineIdx } = meme
+  meme.lines[selectedLineIdx].txt = txt
 }
 
 function selectSavedMeme(imgId) {
-  var savedMemes = loadFromStorage('savedMemes')
-  var meme = savedMemes.find((meme) => {
-    return meme.selectedImgId === imgId
+  var imgId = +imgId
+  const savedMemes = loadFromStorage('savedMemes')
+  const meme = savedMemes.find((meme) => {
+    return meme.id === imgId
   })
   gMeme = meme
 }
@@ -347,12 +364,12 @@ function drawText(line) {
   gCtx.fillStyle = color
   gCtx.font = `${size}px ${font}`
   gCtx.textAlign = align
-
   gCtx.fillText(txt, pos.x, pos.y)
   gCtx.strokeText(txt, pos.x, pos.y)
   const textWidth = gCtx.measureText(txt).width
   const textHeight = size
   const textPos = { x: pos.x - textWidth / 2, y: pos.y - textHeight }
+
   return textPos
 }
 
@@ -389,7 +406,6 @@ function renderGallery() {
     return `<img src="${img.url}" onclick="onSelectImg(${img.id})" />`
   })
   document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
-  createBtnForRandomMeme()
 }
 
 function getImgs() {
@@ -418,4 +434,21 @@ function loadImageFromInput(ev, onImageReady) {
     // img.onload = () => onImageReady(img)
   }
   reader.readAsDataURL(ev.target.files[0]) // Read the file we picked
+}
+
+function renderRecOnText(line) {
+  const { size } = line
+  const { pos } = line
+  const strokeColor = 'white'
+  const textWidth = gCtx.measureText(line.txt).width
+  const textHeight = size
+  gCtx.beginPath()
+  gCtx.rect(
+    pos.x - textWidth / 2 - 5,
+    pos.y - textHeight,
+    textWidth + 10,
+    textHeight + 10
+  )
+  gCtx.strokeStyle = strokeColor
+  gCtx.stroke()
 }

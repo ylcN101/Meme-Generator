@@ -50,9 +50,9 @@ function addMouseListeners() {
 }
 
 function addTouchListeners() {
-  // gElCanvas.addEventListener('touchstart', onDown)
-  // gElCanvas.addEventListener('touchmove', onMove)
-  // gElCanvas.addEventListener('touchend', onUp)
+  gElCanvas.addEventListener('touchstart', onDown)
+  gElCanvas.addEventListener('touchmove', onMove)
+  gElCanvas.addEventListener('touchend', onUp)
 }
 
 function getEvPos(ev) {
@@ -86,7 +86,7 @@ function makeId(length = 6) {
   return txt
 }
 
-function makeLorem(wordCount = 100) {
+function makeLorem(wordCount = 3) {
   const words = [
     'The sky',
     'above',

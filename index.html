@@ -8,6 +8,7 @@
       src="https://kit.fontawesome.com/4d1eea4b96.js"
       crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="lib\animate.min.css" />
 
     <title>Meme Generation</title>
   </head>
@@ -16,9 +17,13 @@
     <header class="main-header">
       <div onclick="onRefresh()" class="logo">Meme Generator</div>
       <div class="gallery">
+        <button class="btn-random" onclick="onGenerateRandomMeme()">
+          Generate random meme
+        </button>
         <button onclick="onShowSavedMemes()">Saved Memes</button>
         <button onclick="onShowGallery()">Meme Gallery</button>
       </div>
+      <div class="key-word-count"></div>
 
       <datalist id="searchMeme">
         <option value="funny" label="funny"></option>

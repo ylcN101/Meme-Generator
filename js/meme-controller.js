@@ -5,15 +5,15 @@ const TOUCH_EVS = ['touchstart', 'touchmove', 'touchend']
 var gElCanvas
 var gElContainer
 var gCtx
-
 var gStartPos
 
 function onInit() {
   gElCanvas = document.querySelector('#canvas')
   gCtx = gElCanvas.getContext('2d')
-  resizeCanvas()
+  gSavedMemes = loadFromStorage('savedMemes')
+  if (!gSavedMemes) gSavedMemes = []
   addListeners()
-  renderMeme()
+  onShowGallery()
 }
 
 function renderMeme() {
@@ -25,7 +25,9 @@ function renderMeme() {
 
 function addListeners() {
   addMouseListeners()
+  addTouchListeners()
   window.addEventListener('resize', () => {
+    resizeCanvas()
     renderMeme()
   })
 }
@@ -80,6 +82,12 @@ function onSwitchLine() {
   renderMeme()
 }
 
+function getCurrLine() {
+  const meme = getMeme()
+  const { selectedLineIdx } = meme
+  return meme.lines[selectedLineIdx]
+}
+
 function onAddLine() {
   if (gMeme.lines.length === 3) return
   addLine()
@@ -98,6 +106,8 @@ function onHandleSizeText(diff) {
 }
 
 function onShowGallery() {
+  var elRandomBtn = document.querySelector('.btn-random')
+  elRandomBtn.style.display = 'block'
   var elModal = document.querySelector('.modal-gallery')
   elModal.style.display = 'block'
   var elSearch = document.querySelector('.search')
@@ -107,27 +117,11 @@ function onShowGallery() {
   renderGallery()
 }
 
-function createBtnForRandomMeme() {
-  var elBtn = document.createElement('button')
-  elBtn.innerText = 'Generate Random Meme'
-  elBtn.classList.add('btn-random')
-  elBtn.addEventListener('click', onGenerateRandomMeme)
-  document.querySelector('.modal-gallery').appendChild(elBtn)
-}
-
 function onSearch() {
-  const elSearch = document.querySelector('.search')
+  const elSearch = document.querySelector('input[name=search]')
   const searchValue = elSearch.value
-  const imgs = getImgs()
-  const strHtmls = imgs.map((img) => {
-    if (img.keywords.includes(searchValue)) {
-      return `<img src="${img.url}" onclick="onSelectImg(${img.id})" />`
-    }
-  })
-  document.querySelector('.modal-gallery').innerHTML = strHtmls.join('')
-  if (!searchValue) {
-    renderGallery()
-  }
+  console.log(searchValue)
+  renderSearch(searchValue)
 }
 
 function onGenerateRandomMeme() {
@@ -137,6 +131,8 @@ function onGenerateRandomMeme() {
   elContent.style.display = 'flex'
   var elSearch = document.querySelector('.search')
   elSearch.style.display = 'none'
+  var elRandomBtn = document.querySelector('.btn-random')
+  elRandomBtn.style.display = 'none'
 
   generateRandomMeme()
   renderMeme()
@@ -149,6 +145,8 @@ function onSelectImg(imgId) {
   elContent.style.display = 'flex'
   var elSearch = document.querySelector('.search')
   elSearch.style.display = 'none'
+  var elRandomBtn = document.querySelector('.btn-random')
+  elRandomBtn.style.display = 'none'
 
   if (gMeme.lines.length) {
     gMeme.lines = []
@@ -186,7 +184,8 @@ function onHandleFontText(font) {
 }
 
 function onSaveMeme() {
-  saveMeme()
+  const memeUrl = gElCanvas.toDataURL('image/jpeg')
+  saveMeme(memeUrl)
 }
 
 function showModal(msg) {
@@ -195,10 +194,14 @@ function showModal(msg) {
   el.classList.add('open')
   setTimeout(() => {
     el.classList.remove('open')
-  }, 2000)
+  }, 3000)
 }
 
 function onShowSavedMemes() {
+  if (!getSavedMemes()) {
+    showModal('No saved memes yet!')
+    return
+  }
   var elModal = document.querySelector('.modal-gallery')
   elModal.style.display = 'block'
   var elContent = document.querySelector('.main-content')
@@ -206,11 +209,31 @@ function onShowSavedMemes() {
   renderSavedMemes()
 }
 
+function renderSavedMemes() {
+  const savedMemes = getSavedMemes()
+  const elGallery = document.querySelector('.modal-gallery')
+  let strHtml = ''
+  savedMemes.forEach((meme) => {
+    strHtml += `<img src="${meme.currImg}" onclick="onSelectSavedMeme('${meme.id}')">`
+  })
+  elGallery.innerHTML = strHtml
+}
+
 function onSelectSavedMeme(imgId) {
   var elModal = document.querySelector('.modal-gallery')
   elModal.style.display = 'none'
   var elContent = document.querySelector('.main-content')
   elContent.style.display = 'flex'
+  var elSearch = document.querySelector('.search')
+  elSearch.style.display = 'none'
+  var elRandomBtn = document.querySelector('.btn-random')
+  elRandomBtn.style.display = 'none'
+
+  if (gMeme.lines.length) {
+    gMeme.lines = []
+    gMeme.selectedLineIdx = 0
+  }
+
   selectSavedMeme(imgId)
   renderMeme()
 }
@@ -250,6 +273,7 @@ function onDown(ev) {
   if (!isLineClicked(pos, line)) return
   setLineDrag(true)
   gStartPos = pos
+  renderRecOnText(line)
 }
 
 function getCurrImg() {
@@ -259,6 +283,7 @@ function getCurrImg() {
 function onMove(ev) {
   const meme = getMeme()
   if (!meme.lines.length) return
+  renderRecOnText(getLine())
   if (!isLineDrag()) return
   const pos = getEvPos(ev)
   const dx = pos.x - gStartPos.x
@@ -276,8 +301,7 @@ function onUp() {
 }
 
 function isLineDrag() {
-  const meme = getMeme()
-  return meme.lines[meme.selectedLineIdx].isDrag
+  return gMeme.lines[gMeme.selectedLineIdx].isDrag
 }
 
 function setLineDrag(isDrag) {

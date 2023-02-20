@@ -34,12 +34,17 @@ img {
 .user-msg {
   display: none;
   position: absolute;
-  top: 8.2em;
-  left: 0em;
+  font-family: Arial, Helvetica, sans-serif;
+  animation: 1s pulse 1s 2;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 10px;
+  color: #180000;
+  top: 5em;
+  left: 29em;
   z-index: 2;
-  background-color: #46cf7f;
+  background-color: #19a59f;
   padding: 10px;
-  transition: all 0.5s ease-in-out;
 }
 
 .user-msg.open {
