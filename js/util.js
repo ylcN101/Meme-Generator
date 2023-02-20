@@ -34,15 +34,6 @@ function resizeCanvas() {
   gElCanvas.height = elContainer.offsetHeight
 }
 
-// function addListeners() {
-//   addMouseListeners()
-//   addTouchListeners()
-//   //Listen for resize ev
-//   window.addEventListener('resize', () => {
-//     onInit()
-//   })
-// }
-
 function addMouseListeners() {
   gElCanvas.addEventListener('mousedown', onDown)
   gElCanvas.addEventListener('mousemove', onMove)
@@ -92,10 +83,9 @@ function makeLorem(wordCount = 3) {
     'above',
     'the port',
     'was',
-    'the color of television',
+    'the color ',
     'tuned',
     'to',
-    'a dead channel',
     '.',
     'All',
     'this happened',
@@ -105,7 +95,7 @@ function makeLorem(wordCount = 3) {
     'had',
     'the story',
     'bit by bit',
-    'from various people',
+    'from ',
     'and',
     'as generally',
     'happens',
@@ -113,7 +103,7 @@ function makeLorem(wordCount = 3) {
     'each time',
     'it',
     'was',
-    'a different story',
+    'different story',
     '.',
     'It',
     'was',
