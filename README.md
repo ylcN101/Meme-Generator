@@ -1,5 +1,5 @@
 # Meme-generator
-meme generator App Developed With JS&HTML&CSS
+
 
 ![image](https://res.cloudinary.com/dezqiqsqb/image/upload/v1682435831/Meme_dwzxkm.png)
 
